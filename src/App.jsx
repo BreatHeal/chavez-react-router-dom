@@ -6,13 +6,18 @@ import {
   Outlet,
   createBrowserRouter,
   RouterProvider,
+  BrowserRouter,
+  Routes,
   Route,
   Link,
 } from "react-router-dom";
 import Nav from './components/Nav';
+import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Error from './pages/Error';
+import Read from './pages/Read';
+import Update from './pages/Update';
 
 const Dashboard = () => {
   return (
@@ -30,12 +35,27 @@ const router = createBrowserRouter([
     children: [
       {
         path: "/",
-        element: <Login />,
+        element: <Home />,
       },
         
       {
+        path: "/login",
+        element: <Login />,   
+      },
+    
+      {
         path: "/register",
         element: <Register />,   
+      },
+
+      {
+        path: "/viewuser/:id",
+        element: <Read />,   
+      },
+
+      {
+        path: "/updateuser/:id",
+        element: <Update />,   
       },
     
       {

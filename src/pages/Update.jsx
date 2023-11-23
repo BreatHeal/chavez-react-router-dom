@@ -1,61 +1,62 @@
 import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import { useFormik } from "formik";
 import { RegisterSchema } from "../Validations/UserValidation.js";
-import getData from '../modules/getData.js';
-import postData from "../modules/postData.js";
+import axios from "axios";
 import { useNavigate } from 'react-router-dom';
 
-function Register() {
-  const [data, setData] = useState([])
-
+function Update() {
+  const [data, setData] = useState({});
+  const { id } = useParams();
   const navigate = useNavigate();
 
-  useEffect(()=> {
+  useEffect(() => {
     const fetchData = async () => {
       try {
-        const usersData = await getData();
-        setData(usersData);
+        const usersData = await axios.get("http://localhost:3001/users/" + id);
+        setData(usersData.data);
+        formik.setValues({
+            name: usersData.data.name,
+            username: usersData.data.username,
+            email: usersData.data.email,
+            password: usersData.data.password,
+          });
       } catch (error) {
-        console.log('Error in fetchData:', error);
+        console.log("Error in fetchData:", error);
       }
     };
 
     fetchData();
-  }, []);
-
-  const userCount = data.length;
+  }, [id]);
 
   const formik = useFormik({
     initialValues: {
-      id: "",
-      name: "",
-      username: "",
-      email: "",
-      password: "",
-      confirmpassword: "",
+      name: '',
+      username: '',
+      email: '',
+      password: '',
+      confirmpassword: '',
     },
     validationSchema: RegisterSchema,
     onSubmit: (values) => {
-      formik.validateForm().then((errors) => {
-        if (Object.keys(errors).length === 0) {
-          values.id = userCount + 1;
-          window.alert(`User "${values.username}" Registered Successfully`);
+        formik.validateForm().then((errors) => {
+            if (Object.keys(errors).length === 0) {
+              window.alert(`User "${values.username}" Updated Successfully`);
 
-          postData(values)
-          .then(res => {
-            console.log(res);
-          })
-          .catch(error => {
-            console.error(error);
+              try {
+                axios.put(`http://localhost:3001/users/${id}`, values);
+                console.log("Update successful!");
+              } catch (error) {
+                console.error("Error in update:", error);
+              }
+    
+              console.log(values);
+              navigate('/');
+            } else {
+              const errorMessages = Object.values(errors).join("\n");
+              window.alert(`Validation Error:\n${errorMessages}`);
+            }
           });
-
-          console.log(values);
-          navigate('/');
-        } else {
-          const errorMessages = Object.values(errors).join("\n");
-          window.alert(`Validation Error:\n${errorMessages}`);
-        }
-      });
     },
   });
 
@@ -75,7 +76,7 @@ function Register() {
 
   return (
     <div>
-      <h1>REGISTER</h1>
+      <h1>UPDATE USER NO. {data.id}</h1>
       <form onSubmit={formik.handleSubmit}>
         <div className="container-box">
           <label htmlFor="name">Name: </label>
@@ -90,7 +91,9 @@ function Register() {
             style={inputStyles("name")}
           />
           {formik.touched.name && formik.errors.name ? (
-            <div style={{ color: "red", fontSize: "14px"}}>{formik.errors.name}</div>
+            <div style={{ color: "red", fontSize: "14px" }}>
+              {formik.errors.name}
+            </div>
           ) : null}
         </div>
 
@@ -107,7 +110,9 @@ function Register() {
             style={inputStyles("username")}
           />
           {formik.touched.username && formik.errors.username ? (
-            <div style={{ color: "red", fontSize: "14px"}}>{formik.errors.username}</div>
+            <div style={{ color: "red", fontSize: "14px" }}>
+              {formik.errors.username}
+            </div>
           ) : null}
         </div>
 
@@ -124,14 +129,16 @@ function Register() {
             style={inputStyles("email")}
           />
           {formik.touched.email && formik.errors.email ? (
-            <div style={{ color: "red", fontSize: "14px"}}>{formik.errors.email}</div>
+            <div style={{ color: "red", fontSize: "14px" }}>
+              {formik.errors.email}
+            </div>
           ) : null}
         </div>
 
         <div className="container-box">
           <label htmlFor="password">Password: </label>
           <input
-            type="password"
+            type="text"
             id="password"
             name="password"
             placeholder="Password"
@@ -141,7 +148,9 @@ function Register() {
             style={inputStyles("password")}
           />
           {formik.touched.password && formik.errors.password ? (
-            <div style={{ color: "red", fontSize: "14px"}}>{formik.errors.password}</div>
+            <div style={{ color: "red", fontSize: "14px" }}>
+              {formik.errors.password}
+            </div>
           ) : null}
         </div>
 
@@ -162,10 +171,10 @@ function Register() {
           ) : null}
         </div>
 
-        <input className="button" type="submit" value="Register"></input>
+        <input className="button" type="submit" value="Update"></input>
       </form>
     </div>
   );
 }
 
-export default Register;
+export default Update;
